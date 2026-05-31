@@ -91,6 +91,9 @@ ICECAST_SOURCE_PASSWORD=ein-langes-passwort
 ICECAST_ADMIN_PASSWORD=ein-anderes-langes-passwort
 ICECAST_RELAY_PASSWORD=noch-ein-passwort
 STREAM_PUBLIC_PORT=8090
+ICECAST_BURST_ON_CONNECT=0
+ICECAST_BURST_SIZE=8192
+ICECAST_QUEUE_SIZE=131072
 ```
 
 Wenn Docker keinen Zugriff auf `/dev/snd` bekommt, pruefe die Audio-Gruppen-ID auf OMV:
@@ -282,7 +285,15 @@ Icecast hat auch eine Statusseite:
 http://OMV-IP:8090/
 ```
 
-Hinweis zur Latenz: MP3 ueber Icecast ist stabil und kompatibel, aber nicht latenzfrei. Rechne grob mit einigen Sekunden, je nach Client-Puffer. Fuer Multiroom/HomePods ist Stabilitaet meist wichtiger als minimale Latenz. Falls du spaeter extrem niedrige Latenz brauchst, waeren PCM/WAV oder ein anderer Streaming-Transport moeglich, aber oft weniger komfortabel fuer Home Assistant und Music Assistant.
+Hinweis zur Latenz: MP3 ueber Icecast ist stabil und kompatibel, aber nicht latenzfrei. Fuer weniger Startlatenz sind die Icecast-Burst-Puffer klein gesetzt:
+
+```env
+ICECAST_BURST_ON_CONNECT=0
+ICECAST_BURST_SIZE=8192
+ICECAST_QUEUE_SIZE=131072
+```
+
+Der fruehere `burst-size=65535` konnte bei 192 kbit/s bereits rund 2,7 Sekunden Anlaufpuffer erzeugen. Weitere Latenz kommt vom Client-Puffer, bei OwnTone/HomePods zusaetzlich vom AirPlay-Stack.
 
 ## 6. MQTT pruefen
 
