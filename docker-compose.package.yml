@@ -2,10 +2,39 @@ services:
   turntable:
     image: "${TURNTABLE_IMAGE:-ghcr.io/horizongaming1/plattenspieler-turntable:latest}"
     container_name: turntable-bridge
-    env_file:
-      - ./turntable.env
     environment:
-      TZ: ${TZ:-Europe/Berlin}
+      TZ: "${TZ:-Europe/Berlin}"
+      AUDIO_DEVICE: "${AUDIO_DEVICE:-plughw:1,0}"
+      AUDIO_INPUT_CHANNELS: "${AUDIO_INPUT_CHANNELS:-2}"
+      AUDIO_INPUT_RATE: "${AUDIO_INPUT_RATE:-44100}"
+      RMS_ON_THRESHOLD: "${RMS_ON_THRESHOLD:-0.025}"
+      RMS_OFF_THRESHOLD: "${RMS_OFF_THRESHOLD:-0.015}"
+      RMS_WINDOW_SECONDS: "${RMS_WINDOW_SECONDS:-0.5}"
+      SILENCE_TIMEOUT_SECONDS: "${SILENCE_TIMEOUT_SECONDS:-180}"
+      RMS_SAMPLE_RATE: "${RMS_SAMPLE_RATE:-16000}"
+      LEVEL_LOG_INTERVAL_SECONDS: "${LEVEL_LOG_INTERVAL_SECONDS:-10}"
+      MQTT_HOST: "${MQTT_HOST:-homeassistant.local}"
+      MQTT_PORT: "${MQTT_PORT:-1883}"
+      MQTT_USER: "${MQTT_USER:-}"
+      MQTT_PASSWORD: "${MQTT_PASSWORD:-}"
+      MQTT_CLIENT_ID: "${MQTT_CLIENT_ID:-turntable-bridge}"
+      MQTT_STATE_TOPIC: "${MQTT_STATE_TOPIC:-home/turntable/state}"
+      MQTT_AVAILABILITY_TOPIC: "${MQTT_AVAILABILITY_TOPIC:-home/turntable/availability}"
+      MQTT_DISCOVERY_ENABLE: "${MQTT_DISCOVERY_ENABLE:-false}"
+      MQTT_DISCOVERY_PREFIX: "${MQTT_DISCOVERY_PREFIX:-homeassistant}"
+      MQTT_DISCOVERY_OBJECT_ID: "${MQTT_DISCOVERY_OBJECT_ID:-plattenspieler_aktiv}"
+      MQTT_DEVICE_NAME: "${MQTT_DEVICE_NAME:-Plattenspieler}"
+      MQTT_UNIQUE_ID: "${MQTT_UNIQUE_ID:-turntable_bridge_active}"
+      ICECAST_HOST: "${ICECAST_HOST:-icecast}"
+      ICECAST_PORT: "${ICECAST_PORT:-8000}"
+      ICECAST_MOUNT: "${ICECAST_MOUNT:-turntable.mp3}"
+      ICECAST_SOURCE_USER: "${ICECAST_SOURCE_USER:-source}"
+      ICECAST_SOURCE_PASSWORD: "${ICECAST_SOURCE_PASSWORD:-bitte-aendern-source}"
+      STREAM_BITRATE: "${STREAM_BITRATE:-192k}"
+      STREAM_CHANNELS: "${STREAM_CHANNELS:-2}"
+      STREAM_SAMPLE_RATE: "${STREAM_SAMPLE_RATE:-44100}"
+      FFMPEG_LOGLEVEL: "${FFMPEG_LOGLEVEL:-warning}"
+      FFMPEG_RESTART_DELAY_SECONDS: "${FFMPEG_RESTART_DELAY_SECONDS:-5}"
     volumes:
       - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/turntable
       - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/config:/config
@@ -21,10 +50,16 @@ services:
   icecast:
     image: "${ICECAST_IMAGE:-ghcr.io/horizongaming1/plattenspieler-icecast:latest}"
     container_name: turntable-icecast
-    env_file:
-      - ./turntable.env
     environment:
-      TZ: ${TZ:-Europe/Berlin}
+      TZ: "${TZ:-Europe/Berlin}"
+      ICECAST_SOURCE_USER: "${ICECAST_SOURCE_USER:-source}"
+      ICECAST_SOURCE_PASSWORD: "${ICECAST_SOURCE_PASSWORD:-bitte-aendern-source}"
+      ICECAST_ADMIN_USER: "${ICECAST_ADMIN_USER:-admin}"
+      ICECAST_ADMIN_PASSWORD: "${ICECAST_ADMIN_PASSWORD:-bitte-aendern-admin}"
+      ICECAST_RELAY_PASSWORD: "${ICECAST_RELAY_PASSWORD:-bitte-aendern-relay}"
+      ICECAST_HOSTNAME: "${ICECAST_HOSTNAME:-nas1.local}"
+      ICECAST_LOCATION: "${ICECAST_LOCATION:-OMV}"
+      ICECAST_ADMIN_EMAIL: "${ICECAST_ADMIN_EMAIL:-admin@example.local}"
     volumes:
       - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/turntable
       - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/config:/config
