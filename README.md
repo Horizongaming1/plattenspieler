@@ -54,7 +54,7 @@ hw:1,0
 `hw:1,0` bedeutet Karte 1, Device 0. Wenn das Interface ein Format nicht direkt akzeptiert, ist `plughw:1,0` oft praktischer, weil ALSA einfache Konvertierungen uebernimmt. Starte deshalb meist mit:
 
 ```env
-AUDIO_DEVICE=plughw:1,0
+AUDIO_DEVICE=plughw:CARD=CODEC,DEV=0
 ```
 
 Eine kurze Testaufnahme auf OMV:
@@ -75,7 +75,7 @@ cp .env.example .env
 Passe mindestens diese Werte in `.env` an:
 
 ```env
-AUDIO_DEVICE=plughw:1,0
+AUDIO_DEVICE=plughw:CARD=CODEC,DEV=0
 MQTT_HOST=homeassistant.local
 MQTT_USER=
 MQTT_PASSWORD=
@@ -385,7 +385,7 @@ docker exec -it turntable-bridge ffmpeg -devices
 Direkter ffmpeg-Test im Container:
 
 ```bash
-docker exec -it turntable-bridge ffmpeg -f alsa -ac 2 -ar 44100 -i plughw:1,0 -t 10 -f null -
+docker exec -it turntable-bridge ffmpeg -f alsa -ac 2 -ar 44100 -i 'plughw:CARD=CODEC,DEV=0' -t 10 -f null -
 ```
 
 Wenn das fehlschlaegt, stimmen meist `AUDIO_DEVICE`, Rechte auf `/dev/snd` oder `AUDIO_GROUP_ID` nicht.

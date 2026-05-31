@@ -4,7 +4,7 @@ services:
     container_name: turntable-bridge
     environment:
       TZ: "${TZ:-Europe/Berlin}"
-      AUDIO_DEVICE: "${AUDIO_DEVICE:-plughw:1,0}"
+      AUDIO_DEVICE: "${AUDIO_DEVICE:-plughw:CARD=CODEC,DEV=0}"
       AUDIO_INPUT_CHANNELS: "${AUDIO_INPUT_CHANNELS:-2}"
       AUDIO_INPUT_RATE: "${AUDIO_INPUT_RATE:-44100}"
       RMS_ON_THRESHOLD: "${RMS_ON_THRESHOLD:-0.025}"
