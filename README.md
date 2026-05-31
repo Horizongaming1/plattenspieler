@@ -325,7 +325,7 @@ Fuege danach in `configuration.yaml` hinzu:
 ```yaml
 turntable_media_source:
   name: "Plattenspieler"
-  url: "http://192.168.178.203:8090/turntable.mp3"
+  url: "http://nas1.local:8090/turntable.mp3"
   mime_type: "audio/mpeg"
 ```
 
@@ -364,7 +364,7 @@ mqtt:
 
 turntable_media_source:
   name: "Plattenspieler"
-  url: "http://192.168.178.203:8090/turntable.mp3"
+  url: "http://nas1.local:8090/turntable.mp3"
   mime_type: "audio/mpeg"
 ```
 
