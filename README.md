@@ -23,7 +23,9 @@ Die Streaming-Architektur nutzt Icecast. `ffmpeg` liest das ALSA-Geraet genau ei
 │   ├── configuration.yaml
 │   ├── automation-play.yaml
 │   ├── automation-stop.yaml
-│   └── automation-music-assistant-play.yaml
+│   ├── automation-music-assistant-play.yaml
+│   └── custom_components/
+│       └── turntable_media_source/
 └── src/
     └── main.py
 ```
@@ -304,6 +306,49 @@ Dann erzeugt Home Assistant den Binary Sensor automatisch. Alternativ nutzt du d
 
 ## 7. Home Assistant einbinden
 
+### Medienquelle
+
+Damit der Stream im Home-Assistant-Medienbrowser als Quelle erscheint, kopiere den Ordner:
+
+```text
+home-assistant/custom_components/turntable_media_source
+```
+
+nach:
+
+```text
+/config/custom_components/turntable_media_source
+```
+
+Fuege danach in `configuration.yaml` hinzu:
+
+```yaml
+turntable_media_source:
+  name: "Plattenspieler"
+  url: "http://192.168.178.203:8090/turntable.mp3"
+  mime_type: "audio/mpeg"
+```
+
+Starte Home Assistant danach neu. Anschliessend erscheint im Medienbrowser eine Quelle `Plattenspieler`. Die direkte Media-Source-ID fuer Automationen ist:
+
+```text
+media-source://turntable_media_source/turntable
+```
+
+Eine Play-Aktion kann dann so aussehen:
+
+```yaml
+action:
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.wohnzimmer
+    data:
+      media_content_id: "media-source://turntable_media_source/turntable"
+      media_content_type: "audio/mpeg"
+```
+
+Hinweis: Die Medienquelle sorgt dafuer, dass Home Assistant den Stream im Medienbrowser und in `media-source://`-Automationen kennt. Ob ein bestimmter Player den Icecast-Stream wirklich abspielt, entscheidet weiterhin die jeweilige Player-Integration.
+
 Beispiel fuer `configuration.yaml`:
 
 ```yaml
@@ -316,6 +361,11 @@ mqtt:
       payload_on: "ON"
       payload_off: "OFF"
       device_class: sound
+
+turntable_media_source:
+  name: "Plattenspieler"
+  url: "http://192.168.178.203:8090/turntable.mp3"
+  mime_type: "audio/mpeg"
 ```
 
 Automation zum Starten:
@@ -330,10 +380,10 @@ trigger:
 action:
   - service: media_player.play_media
     target:
-      entity_id: media_player.homepod
+      entity_id: media_player.wohnzimmer
     data:
-      media_content_id: "http://OMV-IP:8090/turntable.mp3"
-      media_content_type: "music"
+      media_content_id: "media-source://turntable_media_source/turntable"
+      media_content_type: "audio/mpeg"
 ```
 
 Automation zum Stoppen:

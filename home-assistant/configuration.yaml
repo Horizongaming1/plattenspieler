@@ -7,3 +7,8 @@ mqtt:
       payload_on: "ON"
       payload_off: "OFF"
       device_class: sound
+
+turntable_media_source:
+  name: "Plattenspieler"
+  url: "http://192.168.178.203:8090/turntable.mp3"
+  mime_type: "audio/mpeg"
