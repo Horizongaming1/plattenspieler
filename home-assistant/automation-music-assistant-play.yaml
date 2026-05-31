@@ -1,0 +1,13 @@
+alias: Plattenspieler Music Assistant starten
+mode: restart
+trigger:
+  - platform: state
+    entity_id: binary_sensor.plattenspieler_aktiv
+    to: "on"
+action:
+  - service: music_assistant.play_media
+    target:
+      entity_id: media_player.ma_wohnzimmer
+    data:
+      media_id: "http://OMV-IP:8090/turntable.mp3"
+      media_type: "url"

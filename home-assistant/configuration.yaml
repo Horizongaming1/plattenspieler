@@ -1,0 +1,9 @@
+mqtt:
+  binary_sensor:
+    - name: "Plattenspieler aktiv"
+      unique_id: plattenspieler_aktiv
+      state_topic: "home/turntable/state"
+      availability_topic: "home/turntable/availability"
+      payload_on: "ON"
+      payload_off: "OFF"
+      device_class: sound

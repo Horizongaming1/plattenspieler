@@ -1,0 +1,26 @@
+services:
+  turntable:
+    build:
+      context: .
+      target: app
+    container_name: turntable-bridge
+    env_file:
+      - .env
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - "${AUDIO_GROUP_ID:-29}"
+    depends_on:
+      - icecast
+    restart: unless-stopped
+
+  icecast:
+    build:
+      context: .
+      target: icecast
+    container_name: turntable-icecast
+    env_file:
+      - .env
+    ports:
+      - "${STREAM_PUBLIC_PORT:-8090}:8000"
+    restart: unless-stopped

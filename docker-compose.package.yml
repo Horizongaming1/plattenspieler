@@ -1,0 +1,22 @@
+services:
+  turntable:
+    image: "${TURNTABLE_IMAGE:-ghcr.io/horizongaming1/plattenspieler-turntable:latest}"
+    container_name: turntable-bridge
+    env_file:
+      - .env
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - "${AUDIO_GROUP_ID:-29}"
+    depends_on:
+      - icecast
+    restart: unless-stopped
+
+  icecast:
+    image: "${ICECAST_IMAGE:-ghcr.io/horizongaming1/plattenspieler-icecast:latest}"
+    container_name: turntable-icecast
+    env_file:
+      - .env
+    ports:
+      - "${STREAM_PUBLIC_PORT:-8090}:8000"
+    restart: unless-stopped
