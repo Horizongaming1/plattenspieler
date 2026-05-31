@@ -342,7 +342,7 @@ Inhalt:
 ```m3u
 #EXTM3U
 #EXTINF:-1,Plattenspieler
-http://nas1.local:8090/turntable.mp3
+http://127.0.0.1:8090/turntable.mp3
 ```
 
 OwnTone importiert M3U-Dateien aus der Library. Wenn die Datei eine HTTP-URL enthaelt, wird sie als Internetradio/Radio-Stream erkannt.
