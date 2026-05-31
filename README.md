@@ -94,6 +94,7 @@ STREAM_PUBLIC_PORT=8090
 ICECAST_BURST_ON_CONNECT=0
 ICECAST_BURST_SIZE=8192
 ICECAST_QUEUE_SIZE=131072
+FFMPEG_LOW_LATENCY=true
 ```
 
 Wenn Docker keinen Zugriff auf `/dev/snd` bekommt, pruefe die Audio-Gruppen-ID auf OMV:
@@ -294,6 +295,14 @@ ICECAST_QUEUE_SIZE=131072
 ```
 
 Der fruehere `burst-size=65535` konnte bei 192 kbit/s bereits rund 2,7 Sekunden Anlaufpuffer erzeugen. Weitere Latenz kommt vom Client-Puffer, bei OwnTone/HomePods zusaetzlich vom AirPlay-Stack.
+
+Browser puffern Live-MP3-Streams oft weiterhin mehrere Sekunden. Zum Messen der Server-Latenz ist VLC oder ffplay besser geeignet als Safari/Chrome:
+
+```bash
+ffplay -fflags nobuffer -flags low_delay -probesize 32 -analyzeduration 0 http://nas1.local:8090/turntable.mp3
+```
+
+In VLC kannst du den Netzwerk-Cache testweise auf 300-500 ms setzen. Wenn ffplay/VLC deutlich schneller sind als der Browser, liegt der Rest fast komplett am Browserpuffer.
 
 ## 6. MQTT pruefen
 

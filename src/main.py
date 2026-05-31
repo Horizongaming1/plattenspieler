@@ -81,6 +81,7 @@ class Config:
     stream_sample_rate: int = env_int("STREAM_SAMPLE_RATE", 44100)
 
     ffmpeg_loglevel: str = env("FFMPEG_LOGLEVEL", "warning")
+    ffmpeg_low_latency: bool = env_bool("FFMPEG_LOW_LATENCY", True)
     ffmpeg_restart_delay_seconds: float = env_float(
         "FFMPEG_RESTART_DELAY_SECONDS", 5.0
     )
@@ -262,16 +263,29 @@ class LevelDetector:
 
 
 def build_ffmpeg_command(config: Config) -> list[str]:
-    return [
+    command = [
         "ffmpeg",
         "-nostdin",
         "-hide_banner",
         "-loglevel",
         config.ffmpeg_loglevel,
+    ]
+
+    if config.ffmpeg_low_latency:
+        command += [
+            "-fflags",
+            "nobuffer",
+            "-flags",
+            "low_delay",
+            "-use_wallclock_as_timestamps",
+            "1",
+        ]
+
+    command += [
         "-f",
         "alsa",
         "-thread_queue_size",
-        "1024",
+        "128" if config.ffmpeg_low_latency else "1024",
         "-ac",
         str(config.audio_input_channels),
         "-ar",
@@ -286,6 +300,25 @@ def build_ffmpeg_command(config: Config) -> list[str]:
         str(config.stream_sample_rate),
         "-codec:a",
         "libmp3lame",
+    ]
+
+    if config.ffmpeg_low_latency:
+        command += [
+            "-compression_level",
+            "0",
+            "-write_xing",
+            "0",
+            "-muxdelay",
+            "0",
+            "-muxpreload",
+            "0",
+            "-flush_packets",
+            "1",
+            "-max_delay",
+            "0",
+        ]
+
+    command += [
         "-b:a",
         config.stream_bitrate,
         "-content_type",
@@ -303,6 +336,7 @@ def build_ffmpeg_command(config: Config) -> list[str]:
         "s16le",
         "pipe:1",
     ]
+    return command
 
 
 def log_ffmpeg_stderr(proc: subprocess.Popen[bytes]) -> None:
