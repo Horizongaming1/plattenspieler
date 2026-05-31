@@ -377,7 +377,46 @@ nas1.local
 3689
 ```
 
-OwnTone kann auch automatisch entdeckt werden. Nach dem Einrichten erzeugt Home Assistant den OwnTone-Player und die OwnTone-Outputs. Die Outputs sind die AirPlay-Zonen, also z. B. `HomePod Links`, `HomePod Rechts` oder ein Stereo-/Wohnzimmer-Ziel. Playlists aus OwnTone werden in Home Assistant als Quellen behandelt, deshalb wird `Plattenspieler.m3u` dort als Source `Plattenspieler` nutzbar.
+OwnTone kann auch automatisch entdeckt werden. Nach dem Einrichten erzeugt Home Assistant mindestens den OwnTone-Server-Player. Je nach Home-Assistant-Version werden OwnTone-Playlists nicht immer als `source_list` auf dem Player angezeigt. In diesem Fall steuert Home Assistant OwnTone direkt ueber dessen JSON-API.
+
+OwnTone-Output-IDs in dieser Installation:
+
+```text
+Wohnzimmer:     108676303518050
+HomePod Links:  103426507114260
+HomePod Rechts: 86085953735071
+```
+
+REST-Commands fuer Home Assistant:
+
+```yaml
+rest_command:
+  owntone_outputs_wohnzimmer:
+    url: "http://nas1.local:3689/api/outputs/set"
+    method: PUT
+    content_type: "application/json"
+    payload: '{"outputs":["108676303518050"]}'
+
+  owntone_outputs_homepods:
+    url: "http://nas1.local:3689/api/outputs/set"
+    method: PUT
+    content_type: "application/json"
+    payload: '{"outputs":["103426507114260","86085953735071"]}'
+
+  owntone_outputs_off:
+    url: "http://nas1.local:3689/api/outputs/set"
+    method: PUT
+    content_type: "application/json"
+    payload: '{"outputs":[]}'
+
+  owntone_play_plattenspieler:
+    url: "http://nas1.local:3689/api/queue/items/add?clear=true&playback=start&playback_from_position=0&shuffle=false&uris=library:playlist:7"
+    method: POST
+
+  owntone_stop:
+    url: "http://nas1.local:3689/api/player/stop"
+    method: PUT
+```
 
 Beispiel-Automation zum Starten:
 
@@ -389,19 +428,9 @@ trigger:
     entity_id: binary_sensor.plattenspieler_aktiv
     to: "on"
 action:
-  - service: media_player.select_source
-    target:
-      entity_id: media_player.owntone_server
-    data:
-      source: "Plattenspieler"
-  - service: media_player.turn_on
-    target:
-      entity_id:
-        - media_player.owntone_output_homepod_links
-        - media_player.owntone_output_homepod_rechts
-  - service: media_player.media_play
-    target:
-      entity_id: media_player.owntone_server
+  - service: rest_command.owntone_outputs_wohnzimmer
+  - delay: "00:00:01"
+  - service: rest_command.owntone_play_plattenspieler
 ```
 
 Beispiel-Automation zum Stoppen:
@@ -414,34 +443,12 @@ trigger:
     entity_id: binary_sensor.plattenspieler_aktiv
     to: "off"
 action:
-  - service: media_player.media_stop
-    target:
-      entity_id: media_player.owntone_server
-  - service: media_player.turn_off
-    target:
-      entity_id:
-        - media_player.owntone_output_homepod_links
-        - media_player.owntone_output_homepod_rechts
+  - service: rest_command.owntone_stop
+  - delay: "00:00:01"
+  - service: rest_command.owntone_outputs_off
 ```
 
-Die Entity-IDs sind Platzhalter. Die echten IDs findest du nach dem Einrichten in Home Assistant unter `Entwicklerwerkzeuge` -> `Zustaende`, Filter `owntone`.
-
-Optional kannst du OwnTone auch direkt per REST steuern. Dafuer liegen Beispiele in `home-assistant/rest-owntone.yaml`:
-
-```yaml
-rest_command:
-  owntone_play:
-    url: "http://nas1.local:3689/api/player/play"
-    method: PUT
-
-  owntone_stop:
-    url: "http://nas1.local:3689/api/player/stop"
-    method: PUT
-
-  owntone_rescan:
-    url: "http://nas1.local:3689/api/library/rescan"
-    method: PUT
-```
+Die REST-Variante ist absichtlich unabhaengig davon, ob Home Assistant die OwnTone-Playlist als Medienquelle oder Source auflistet. Sie nutzt direkt OwnTones Queue- und Output-API.
 
 ### Medienquelle
 

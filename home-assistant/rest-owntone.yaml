@@ -1,12 +1,30 @@
 rest_command:
-  owntone_play:
-    url: "http://nas1.local:3689/api/player/play"
+  owntone_outputs_wohnzimmer:
+    url: "http://nas1.local:3689/api/outputs/set"
+    method: PUT
+    content_type: "application/json"
+    payload: '{"outputs":["108676303518050"]}'
+
+  owntone_outputs_homepods:
+    url: "http://nas1.local:3689/api/outputs/set"
+    method: PUT
+    content_type: "application/json"
+    payload: '{"outputs":["103426507114260","86085953735071"]}'
+
+  owntone_outputs_off:
+    url: "http://nas1.local:3689/api/outputs/set"
+    method: PUT
+    content_type: "application/json"
+    payload: '{"outputs":[]}'
+
+  owntone_play_plattenspieler:
+    url: "http://nas1.local:3689/api/queue/items/add?clear=true&playback=start&playback_from_position=0&shuffle=false&uris=library:playlist:7"
+    method: POST
+
+  owntone_rescan:
+    url: "http://nas1.local:3689/api/library/rescan"
     method: PUT
 
   owntone_stop:
     url: "http://nas1.local:3689/api/player/stop"
-    method: PUT
-
-  owntone_rescan:
-    url: "http://nas1.local:3689/api/library/rescan"
     method: PUT
