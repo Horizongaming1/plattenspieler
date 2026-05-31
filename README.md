@@ -183,22 +183,15 @@ Lege im OMV-Webinterface genau einen Shared Folder an:
 turntable
 ```
 
-Dieser Shared Folder ist der komplette Projektordner fuer den Stack. In diesem Ordner liegen die Compose-Datei und die `.env`. Es wird kein zusaetzlicher `C`-, `appdata`- oder `compose`-Ordner benoetigt.
+Dieser Shared Folder ist der komplette Projektordner fuer den Stack. In diesem Ordner liegen die Compose-Datei und die Env-Datei `turntable.env`. Es wird kein zusaetzlicher `C`-, `appdata`- oder weiterer Projektordner benoetigt.
 
-In `.env` zeigt `TURNTABLE_DATA_DIR` auf genau diesen Ordner:
-
-```env
-TURNTABLE_DATA_DIR=/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable
-```
-
-Die Compose-Datei bindet diesen Host-Ordner in beide Container nach `/config` ein:
+Die Compose-Datei nutzt relative Volumes. OMV legt sie dadurch unterhalb des Stack-Workdirs an:
 
 ```yaml
 volumes:
-  - "${TURNTABLE_DATA_DIR:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/config"
+  - ./config:/config
+  - ./logs:/logs
 ```
-
-Wichtig: `volumes` braucht immer `HOSTPFAD:CONTAINERPFAD`. Eine einzelne Zeile wie `/srv/.../turntable` waere kein sauberer Bind-Mount zu diesem Host-Ordner.
 
 Der Container selbst braucht keinen zusaetzlichen `working_dir:`-Eintrag. Das Image setzt intern bereits:
 
@@ -211,7 +204,7 @@ Vorgehen im OMV Compose Plugin:
 1. Lege einen neuen Compose-Stack oder eine neue Compose-Datei an, z. B. `turntable`.
 2. Setze als Projekt-/Workdir den Shared Folder `turntable`.
 3. Fuege den Inhalt aus `docker-compose.package.yml` ein.
-4. Lege im selben Projektordner die `.env` aus `.env.example` an und passe die Werte an.
+4. Lege im selben Projektordner die Env-Datei `turntable.env` aus `.env.example` an und passe die Werte an.
 5. Starte den Stack ueber "Up".
 
 Wenn du das YAML direkt ins Webinterface kopierst, verwende fuer das Package-Deployment diese Variante:
@@ -222,9 +215,10 @@ services:
     image: "${TURNTABLE_IMAGE:-ghcr.io/horizongaming1/plattenspieler-turntable:latest}"
     container_name: turntable-bridge
     env_file:
-      - .env
+      - ./turntable.env
     volumes:
-      - "${TURNTABLE_DATA_DIR:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/config"
+      - ./config:/config
+      - ./logs:/logs
     devices:
       - /dev/snd:/dev/snd
     group_add:
@@ -237,9 +231,10 @@ services:
     image: "${ICECAST_IMAGE:-ghcr.io/horizongaming1/plattenspieler-icecast:latest}"
     container_name: turntable-icecast
     env_file:
-      - .env
+      - ./turntable.env
     volumes:
-      - "${TURNTABLE_DATA_DIR:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/config"
+      - ./config:/config
+      - ./logs:/logs
     ports:
       - "${STREAM_PUBLIC_PORT:-8090}:8000"
     restart: unless-stopped
