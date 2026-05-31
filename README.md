@@ -177,11 +177,13 @@ docker compose -f docker-compose.package.yml up -d
 
 ## 4a. OMV Webinterface / Compose Plugin
 
-Im OMV-Webinterface ist mit "Workdir" normalerweise der Projektordner des Compose-Stacks gemeint. Das ist der richtige Ort fuer `.env`, Compose-Datei und spaetere Logs/Projektmetadaten, zum Beispiel:
+Lege im OMV-Webinterface genau einen Shared Folder an:
 
 ```text
-/srv/dev-disk-by-uuid-.../appdata/plattenspieler
+turntable
 ```
+
+Dieser Shared Folder ist der komplette Projektordner fuer den Stack. In diesem Ordner liegen die Compose-Datei und die `.env`. Es wird kein zusaetzlicher `C`-, `appdata`- oder `compose`-Ordner benoetigt.
 
 Der Container selbst braucht keinen zusaetzlichen `working_dir:`-Eintrag. Das Image setzt intern bereits:
 
@@ -191,10 +193,10 @@ WORKDIR /app
 
 Vorgehen im OMV Compose Plugin:
 
-1. Lege einen neuen Compose-Stack oder eine neue Compose-Datei an, z. B. `plattenspieler`.
-2. Setze als Projekt-/Workdir einen eigenen Ordner, z. B. `/srv/dev-disk-by-uuid-.../appdata/plattenspieler`.
+1. Lege einen neuen Compose-Stack oder eine neue Compose-Datei an, z. B. `turntable`.
+2. Setze als Projekt-/Workdir den Shared Folder `turntable`.
 3. Fuege den Inhalt aus `docker-compose.package.yml` ein.
-4. Lege im selben Projekt die `.env` aus `.env.example` an und passe die Werte an.
+4. Lege im selben Projektordner die `.env` aus `.env.example` an und passe die Werte an.
 5. Starte den Stack ueber "Up".
 
 Wenn du das YAML direkt ins Webinterface kopierst, verwende fuer das Package-Deployment diese Variante:
