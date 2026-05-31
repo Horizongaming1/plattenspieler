@@ -67,3 +67,18 @@ services:
     ports:
       - "${STREAM_PUBLIC_PORT:-8090}:8000"
     restart: unless-stopped
+
+  owntone:
+    image: "${OWNTONE_IMAGE:-docker.io/owntone/owntone:latest}"
+    container_name: turntable-owntone
+    network_mode: host
+    environment:
+      UID: "${OWNTONE_UID:-1000}"
+      GID: "${OWNTONE_GID:-100}"
+    volumes:
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/owntone/etc:/etc/owntone
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/owntone/media:/srv/media
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/owntone/cache:/var/cache/owntone
+    depends_on:
+      - icecast
+    restart: unless-stopped

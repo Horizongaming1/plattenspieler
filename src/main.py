@@ -310,6 +310,8 @@ def log_ffmpeg_stderr(proc: subprocess.Popen[bytes]) -> None:
     for raw_line in iter(proc.stderr.readline, b""):
         line = raw_line.decode("utf-8", errors="replace").strip()
         if line:
+            if "non monotonically increasing dts" in line:
+                continue
             LOGGER.warning("ffmpeg: %s", line)
 
 
