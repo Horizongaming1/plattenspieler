@@ -1,0 +1,15 @@
+alias: Plattenspieler OwnTone stoppen
+mode: single
+trigger:
+  - platform: state
+    entity_id: binary_sensor.plattenspieler_aktiv
+    to: "off"
+action:
+  - service: media_player.media_stop
+    target:
+      entity_id: media_player.owntone_server
+  - service: media_player.turn_off
+    target:
+      entity_id:
+        - media_player.owntone_output_homepod_links
+        - media_player.owntone_output_homepod_rechts

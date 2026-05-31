@@ -1,0 +1,3 @@
+#EXTM3U
+#EXTINF:-1,Plattenspieler
+http://nas1.local:8090/turntable.mp3

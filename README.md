@@ -24,8 +24,14 @@ Die Streaming-Architektur nutzt Icecast. `ffmpeg` liest das ALSA-Geraet genau ei
 │   ├── automation-play.yaml
 │   ├── automation-stop.yaml
 │   ├── automation-music-assistant-play.yaml
+│   ├── automation-owntone-play.yaml
+│   ├── automation-owntone-stop.yaml
+│   ├── rest-owntone.yaml
 │   └── custom_components/
 │       └── turntable_media_source/
+├── owntone/
+│   └── media/
+│       └── Plattenspieler.m3u
 └── src/
     └── main.py
 ```
@@ -305,6 +311,137 @@ MQTT_DISCOVERY_ENABLE=true
 Dann erzeugt Home Assistant den Binary Sensor automatisch. Alternativ nutzt du das YAML aus `home-assistant/configuration.yaml`.
 
 ## 7. Home Assistant einbinden
+
+### OwnTone als AirPlay-Bridge
+
+OwnTone kann als dritter Container im selben Stack laufen und dann selbst auf AirPlay-/HomePod-Ziele streamen. Wichtig ist `network_mode: host`, weil OwnTone fuer AirPlay/mDNS die direkte Netzwerksicht des NAS braucht.
+
+Die Compose-Erweiterung liegt in:
+
+```text
+docker-compose.owntone.yml
+```
+
+Im OMV Compose Plugin kannst du den `owntone`-Service daraus in deinen bestehenden `turntable`-Stack uebernehmen. Er nutzt denselben Shared Folder:
+
+```yaml
+volumes:
+  - ${TURNTABLE_HOST_PATH}/owntone/etc:/etc/owntone
+  - ${TURNTABLE_HOST_PATH}/owntone/media:/srv/media
+  - ${TURNTABLE_HOST_PATH}/owntone/cache:/var/cache/owntone
+```
+
+Lege auf OMV zusaetzlich diese Datei an:
+
+```text
+/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable/owntone/media/Plattenspieler.m3u
+```
+
+Inhalt:
+
+```m3u
+#EXTM3U
+#EXTINF:-1,Plattenspieler
+http://nas1.local:8090/turntable.mp3
+```
+
+OwnTone importiert M3U-Dateien aus der Library. Wenn die Datei eine HTTP-URL enthaelt, wird sie als Internetradio/Radio-Stream erkannt.
+
+Nach dem Start ist die OwnTone-Weboberflaeche erreichbar unter:
+
+```text
+http://nas1.local:3689/
+```
+
+Dort:
+
+1. Library neu scannen.
+2. `Plattenspieler` in den Radios/Playlists suchen.
+3. AirPlay-Outputs `HomePod Links`, `HomePod Rechts` oder `Wohnzimmer` aktivieren.
+4. Manuell Play testen.
+
+Home Assistant soll danach ueber die offizielle OwnTone-Integration auf den OwnTone-Server zugreifen:
+
+1. Home Assistant: `Einstellungen` -> `Geraete & Dienste`.
+2. `Integration hinzufuegen`.
+3. `OwnTone` auswaehlen.
+4. Host:
+
+```text
+nas1.local
+```
+
+5. Port:
+
+```text
+3689
+```
+
+OwnTone kann auch automatisch entdeckt werden. Nach dem Einrichten erzeugt Home Assistant den OwnTone-Player und die OwnTone-Outputs. Die Outputs sind die AirPlay-Zonen, also z. B. `HomePod Links`, `HomePod Rechts` oder ein Stereo-/Wohnzimmer-Ziel. Playlists aus OwnTone werden in Home Assistant als Quellen behandelt, deshalb wird `Plattenspieler.m3u` dort als Source `Plattenspieler` nutzbar.
+
+Beispiel-Automation zum Starten:
+
+```yaml
+alias: Plattenspieler OwnTone starten
+mode: restart
+trigger:
+  - platform: state
+    entity_id: binary_sensor.plattenspieler_aktiv
+    to: "on"
+action:
+  - service: media_player.select_source
+    target:
+      entity_id: media_player.owntone_server
+    data:
+      source: "Plattenspieler"
+  - service: media_player.turn_on
+    target:
+      entity_id:
+        - media_player.owntone_output_homepod_links
+        - media_player.owntone_output_homepod_rechts
+  - service: media_player.media_play
+    target:
+      entity_id: media_player.owntone_server
+```
+
+Beispiel-Automation zum Stoppen:
+
+```yaml
+alias: Plattenspieler OwnTone stoppen
+mode: single
+trigger:
+  - platform: state
+    entity_id: binary_sensor.plattenspieler_aktiv
+    to: "off"
+action:
+  - service: media_player.media_stop
+    target:
+      entity_id: media_player.owntone_server
+  - service: media_player.turn_off
+    target:
+      entity_id:
+        - media_player.owntone_output_homepod_links
+        - media_player.owntone_output_homepod_rechts
+```
+
+Die Entity-IDs sind Platzhalter. Die echten IDs findest du nach dem Einrichten in Home Assistant unter `Entwicklerwerkzeuge` -> `Zustaende`, Filter `owntone`.
+
+Optional kannst du OwnTone auch direkt per REST steuern. Dafuer liegen Beispiele in `home-assistant/rest-owntone.yaml`:
+
+```yaml
+rest_command:
+  owntone_play:
+    url: "http://nas1.local:3689/api/player/play"
+    method: PUT
+
+  owntone_stop:
+    url: "http://nas1.local:3689/api/player/stop"
+    method: PUT
+
+  owntone_rescan:
+    url: "http://nas1.local:3689/api/library/rescan"
+    method: PUT
+```
 
 ### Medienquelle
 

@@ -1,0 +1,12 @@
+rest_command:
+  owntone_play:
+    url: "http://nas1.local:3689/api/player/play"
+    method: PUT
+
+  owntone_stop:
+    url: "http://nas1.local:3689/api/player/stop"
+    method: PUT
+
+  owntone_rescan:
+    url: "http://nas1.local:3689/api/library/rescan"
+    method: PUT
