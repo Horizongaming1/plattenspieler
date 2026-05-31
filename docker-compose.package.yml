@@ -4,9 +4,12 @@ services:
     container_name: turntable-bridge
     env_file:
       - ./turntable.env
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
     volumes:
-      - ./config:/config
-      - ./logs:/logs
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/turntable
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/config:/config
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/logs:/logs
     devices:
       - /dev/snd:/dev/snd
     group_add:
@@ -20,9 +23,12 @@ services:
     container_name: turntable-icecast
     env_file:
       - ./turntable.env
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
     volumes:
-      - ./config:/config
-      - ./logs:/logs
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/turntable
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/config:/config
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/logs:/logs
     ports:
       - "${STREAM_PUBLIC_PORT:-8090}:8000"
     restart: unless-stopped

@@ -183,14 +183,19 @@ Lege im OMV-Webinterface genau einen Shared Folder an:
 turntable
 ```
 
-Dieser Shared Folder ist der komplette Projektordner fuer den Stack. In diesem Ordner liegen die Compose-Datei und die Env-Datei `turntable.env`. Es wird kein zusaetzlicher `C`-, `appdata`- oder weiterer Projektordner benoetigt.
+Dieser Shared Folder ist der Datenordner fuer den Stack. In `turntable.env` zeigt `TURNTABLE_HOST_PATH` explizit auf diesen OMV Shared Folder:
 
-Die Compose-Datei nutzt relative Volumes. OMV legt sie dadurch unterhalb des Stack-Workdirs an:
+```env
+TURNTABLE_HOST_PATH=/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable
+```
+
+Die Compose-Datei bindet diesen Shared Folder und seine Unterordner in die Container:
 
 ```yaml
 volumes:
-  - ./config:/config
-  - ./logs:/logs
+  - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/turntable
+  - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/config:/config
+  - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/logs:/logs
 ```
 
 Der Container selbst braucht keinen zusaetzlichen `working_dir:`-Eintrag. Das Image setzt intern bereits:
@@ -204,7 +209,7 @@ Vorgehen im OMV Compose Plugin:
 1. Lege einen neuen Compose-Stack oder eine neue Compose-Datei an, z. B. `turntable`.
 2. Setze als Projekt-/Workdir den Shared Folder `turntable`.
 3. Fuege den Inhalt aus `docker-compose.package.yml` ein.
-4. Lege im selben Projektordner die Env-Datei `turntable.env` aus `.env.example` an und passe die Werte an.
+4. Lege im selben Compose-Projekt die Env-Datei `turntable.env` aus `.env.example` an und passe die Werte an.
 5. Starte den Stack ueber "Up".
 
 Wenn du das YAML direkt ins Webinterface kopierst, verwende fuer das Package-Deployment diese Variante:
@@ -216,9 +221,12 @@ services:
     container_name: turntable-bridge
     env_file:
       - ./turntable.env
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
     volumes:
-      - ./config:/config
-      - ./logs:/logs
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/turntable
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/config:/config
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/logs:/logs
     devices:
       - /dev/snd:/dev/snd
     group_add:
@@ -232,9 +240,12 @@ services:
     container_name: turntable-icecast
     env_file:
       - ./turntable.env
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
     volumes:
-      - ./config:/config
-      - ./logs:/logs
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/turntable
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/config:/config
+      - ${TURNTABLE_HOST_PATH:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}/logs:/logs
     ports:
       - "${STREAM_PUBLIC_PORT:-8090}:8000"
     restart: unless-stopped
