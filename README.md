@@ -185,6 +185,21 @@ turntable
 
 Dieser Shared Folder ist der komplette Projektordner fuer den Stack. In diesem Ordner liegen die Compose-Datei und die `.env`. Es wird kein zusaetzlicher `C`-, `appdata`- oder `compose`-Ordner benoetigt.
 
+In `.env` zeigt `TURNTABLE_DATA_DIR` auf genau diesen Ordner:
+
+```env
+TURNTABLE_DATA_DIR=/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable
+```
+
+Die Compose-Datei bindet diesen Host-Ordner in beide Container nach `/config` ein:
+
+```yaml
+volumes:
+  - "${TURNTABLE_DATA_DIR:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/config"
+```
+
+Wichtig: `volumes` braucht immer `HOSTPFAD:CONTAINERPFAD`. Eine einzelne Zeile wie `/srv/.../turntable` waere kein sauberer Bind-Mount zu diesem Host-Ordner.
+
 Der Container selbst braucht keinen zusaetzlichen `working_dir:`-Eintrag. Das Image setzt intern bereits:
 
 ```text
@@ -208,6 +223,8 @@ services:
     container_name: turntable-bridge
     env_file:
       - .env
+    volumes:
+      - "${TURNTABLE_DATA_DIR:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/config"
     devices:
       - /dev/snd:/dev/snd
     group_add:
@@ -221,6 +238,8 @@ services:
     container_name: turntable-icecast
     env_file:
       - .env
+    volumes:
+      - "${TURNTABLE_DATA_DIR:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/config"
     ports:
       - "${STREAM_PUBLIC_PORT:-8090}:8000"
     restart: unless-stopped

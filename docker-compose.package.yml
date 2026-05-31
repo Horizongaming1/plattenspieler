@@ -4,6 +4,8 @@ services:
     container_name: turntable-bridge
     env_file:
       - .env
+    volumes:
+      - "${TURNTABLE_DATA_DIR:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/config"
     devices:
       - /dev/snd:/dev/snd
     group_add:
@@ -17,6 +19,8 @@ services:
     container_name: turntable-icecast
     env_file:
       - .env
+    volumes:
+      - "${TURNTABLE_DATA_DIR:-/srv/dev-disk-by-uuid-ed0cc40b-12e9-481a-9c82-203c8a67d732/turntable}:/config"
     ports:
       - "${STREAM_PUBLIC_PORT:-8090}:8000"
     restart: unless-stopped
