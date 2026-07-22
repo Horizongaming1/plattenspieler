@@ -82,6 +82,7 @@ class Config:
 
     ffmpeg_loglevel: str = env("FFMPEG_LOGLEVEL", "warning")
     ffmpeg_low_latency: bool = env_bool("FFMPEG_LOW_LATENCY", True)
+    ffmpeg_input_queue_size: int = env_int("FFMPEG_INPUT_QUEUE_SIZE", 16)
     ffmpeg_restart_delay_seconds: float = env_float(
         "FFMPEG_RESTART_DELAY_SECONDS", 5.0
     )
@@ -95,6 +96,8 @@ class Config:
             raise ValueError("RMS_WINDOW_SECONDS must be > 0")
         if self.silence_timeout_seconds <= 0:
             raise ValueError("SILENCE_TIMEOUT_SECONDS must be > 0")
+        if self.ffmpeg_input_queue_size <= 0:
+            raise ValueError("FFMPEG_INPUT_QUEUE_SIZE must be > 0")
 
     @property
     def icecast_url(self) -> str:
@@ -277,15 +280,13 @@ def build_ffmpeg_command(config: Config) -> list[str]:
             "nobuffer",
             "-flags",
             "low_delay",
-            "-use_wallclock_as_timestamps",
-            "1",
         ]
 
     command += [
         "-f",
         "alsa",
         "-thread_queue_size",
-        "128" if config.ffmpeg_low_latency else "1024",
+        str(config.ffmpeg_input_queue_size if config.ffmpeg_low_latency else 1024),
         "-ac",
         str(config.audio_input_channels),
         "-ar",

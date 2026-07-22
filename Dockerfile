@@ -8,6 +8,7 @@ RUN apt-get update \
         alsa-utils \
         ca-certificates \
         ffmpeg \
+        gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -16,7 +17,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ ./src/
+COPY docker/alsa-low-latency.conf.template /etc/asound.conf.template
+COPY docker/turntable-entrypoint.sh /usr/local/bin/turntable-entrypoint.sh
+RUN chmod +x /usr/local/bin/turntable-entrypoint.sh
 
+ENTRYPOINT ["/usr/local/bin/turntable-entrypoint.sh"]
 CMD ["python", "-m", "src.main"]
 
 

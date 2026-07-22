@@ -1,0 +1,21 @@
+# Container-local ALSA capture PCM. The values are rendered by the entrypoint.
+pcm.turntable_capture {
+    type dsnoop
+    ipc_key 3829061
+    ipc_key_add_uid true
+    hw_ptr_alignment rounddown
+    tstamp_type monotonic
+    slave {
+        pcm "${ALSA_CAPTURE_DEVICE}"
+        format S16_LE
+        channels ${ALSA_CAPTURE_CHANNELS}
+        rate ${ALSA_CAPTURE_RATE}
+        period_time 0
+        period_size ${ALSA_CAPTURE_PERIOD_SIZE}
+        buffer_size ${ALSA_CAPTURE_BUFFER_SIZE}
+    }
+    bindings {
+        0 0
+        1 1
+    }
+}

@@ -59,10 +59,13 @@ Daraus wird meistens:
 hw:1,0
 ```
 
-`hw:1,0` bedeutet Karte 1, Device 0. Wenn das Interface ein Format nicht direkt akzeptiert, ist `plughw:1,0` oft praktischer, weil ALSA einfache Konvertierungen uebernimmt. Starte deshalb meist mit:
+`hw:1,0` bedeutet Karte 1, Device 0. Wenn das Interface ein Format nicht direkt akzeptiert, ist `plughw:1,0` oft praktischer, weil ALSA einfache Konvertierungen uebernimmt.
 
 ```env
-AUDIO_DEVICE=plughw:CARD=CODEC,DEV=0
+AUDIO_DEVICE=turntable_capture
+ALSA_CAPTURE_DEVICE=hw:CARD=CODEC,DEV=0
+ALSA_CAPTURE_PERIOD_SIZE=256
+ALSA_CAPTURE_BUFFER_SIZE=2048
 ```
 
 Eine kurze Testaufnahme auf OMV:
@@ -95,6 +98,7 @@ ICECAST_BURST_ON_CONNECT=0
 ICECAST_BURST_SIZE=8192
 ICECAST_QUEUE_SIZE=131072
 FFMPEG_LOW_LATENCY=true
+FFMPEG_INPUT_QUEUE_SIZE=16
 ```
 
 Wenn Docker keinen Zugriff auf `/dev/snd` bekommt, pruefe die Audio-Gruppen-ID auf OMV:
@@ -295,6 +299,8 @@ ICECAST_QUEUE_SIZE=131072
 ```
 
 Der fruehere `burst-size=65535` konnte bei 192 kbit/s bereits rund 2,7 Sekunden Anlaufpuffer erzeugen. Weitere Latenz kommt vom Client-Puffer, bei OwnTone/HomePods zusaetzlich vom AirPlay-Stack.
+
+Der mitgelieferte PCM `turntable_capture` setzt den ALSA-Capture-Puffer auf 2.048 Frames bei 44,1 kHz, also rund 46 ms, statt des vom Treiber gewaehlten Mehrsekundenpuffers. Falls das Interface damit Aussetzer oder Overruns meldet, verdopple zuerst `ALSA_CAPTURE_BUFFER_SIZE` auf `4096`; als vollstaendiger Rueckfall setzt du `AUDIO_DEVICE=plughw:CARD=CODEC,DEV=0`.
 
 Browser puffern Live-MP3-Streams oft weiterhin mehrere Sekunden. Zum Messen der Server-Latenz ist VLC oder ffplay besser geeignet als Safari/Chrome:
 
